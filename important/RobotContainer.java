@@ -4,9 +4,12 @@
 
 package frc.robot;
 
+import java.util.function.DoubleSupplier;
+
 import edu.wpi.first.wpilibj.PS4Controller;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.OperatorConstants;
@@ -29,7 +32,7 @@ import frc.robot.subsystems.CANRollerSubsystem;
 public class RobotContainer {
   // The robot's subsystems
   
-  PS4Controller ps4controller = new PS4Controller(1);
+  //PS4Controller ps4controller = new PS4Controller(1);
 
   private final CANDriveSubsystem driveSubsystem = new CANDriveSubsystem();
   private final CANRollerSubsystem rollerSubsystem = new CANRollerSubsystem();
@@ -86,11 +89,10 @@ public class RobotContainer {
     // value). Similarly for the X axis where we need to flip the value so the
     // joystick matches the WPILib convention of counter-clockwise positive
     
-    //i removed the minus signs to make the input correct.
     driveSubsystem.setDefaultCommand(new DriveCommand(
-     () -> driverController.getLeftY() *
+     () -> -driverController.getLeftY() *
         (driverController.getHID().getRightBumperButton() ? 1 : 0.5),
-     () -> driverController.getRightX(),
+     () -> -driverController.getRightX(),
     driveSubsystem));
 
     // Set the default command for the roller subsystem to an instance of
@@ -111,4 +113,12 @@ public class RobotContainer {
     // An example command will be run in autonomous
     return autoChooser.getSelected();
   }
-}
+
+  public Command driveTank(
+    CANDriveSubsystem driveSubsystem, DoubleSupplier xSpeed, DoubleSupplier zRotation) {
+    return Commands.run(
+        () -> driveSubsystem.driveTank(xSpeed.getAsDouble(), zRotation.getAsDouble()), driveSubsystem);
+
+    } 
+
+  }
