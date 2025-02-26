@@ -1,100 +1,73 @@
-//this code is the second github iteration of "robot java"
-
 // Copyright (c) FIRST and other WPILib contributors.
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
 package frc.robot;
 
-import edu.wpi.first.hal.FRCNetComm.tResourceType;
+import edu.wpi.first.util.sendable.SendableRegistry;
+import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.drive.DifferentialDrive;
+import edu.wpi.first.wpilibj.motorcontrol.PWMSparkMax;
 
-import com.revrobotics.spark.SparkLowLevel;
-import com.revrobotics.spark.SparkLowLevel.MotorType;
+import edu.wpi.first.hal.FRCNetComm.tResourceType;
 
 import edu.wpi.first.hal.HAL;
 import edu.wpi.first.wpilibj.PS4Controller;
-import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
 import edu.wpi.first.wpilibj.Joystick;
-import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
-import edu.wpi.first.wpilibj.motorcontrol.PWMSparkMax;
 
 import com.revrobotics.spark.SparkLowLevel;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
-import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.SparkMax;
-import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.SparkBase;
-import com.revrobotics.spark.SparkBase.PersistMode;
-import edu.wpi.first.util.sendable.SendableRegistry;
+
 
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.XboxController;
-
-
 
 /**
- * The VM is configured to automatically run this class, and to call the
- * functions corresponding to
- * each mode, as described in the TimedRobot documentation. If you change the
- * name of this class or
- * the package after creating this project, you must also update the
- * build.gradle file in the
- * project.
+ * This is a demo program showing the use of the DifferentialDrive class. Runs the motors with tank
+ * steering and an Xbox controller.
  */
 public class Robot extends TimedRobot {
-  
-  private final PWMSparkMax m_leftDrive = new PWMSparkMax(0);
-  private final PWMSparkMax m_rightDrive = new PWMSparkMax(1);
+  private final PWMSparkMax m_leftLeaderMotor = new PWMSparkMax(2);
+  private final PWMSparkMax m_leftFollowerMotor = new PWMSparkMax(1);
+  private final PWMSparkMax m_rightLeaderMotor = new PWMSparkMax(4);
+  private final PWMSparkMax m_rightFollowerMotor = new PWMSparkMax(3);
+
   private final DifferentialDrive m_robotDrive =
-      new DifferentialDrive(m_leftDrive::set, m_rightDrive::set);
-  private final XboxController m_controller = new XboxController(0);
+      new DifferentialDrive(m_leftLeaderMotor::set, m_rightLeaderMotor::set);
+  private final XboxController m_driverController = new XboxController(0);
   private final Timer m_timer = new Timer();
-
-
   /** Called once at the beginning of the robot program. */
   public Robot() {
-    SendableRegistry.addChild(m_robotDrive, m_leftDrive);
-    SendableRegistry.addChild(m_robotDrive, m_rightDrive);
+    SendableRegistry.addChild(m_robotDrive, m_leftLeaderMotor);
+    SendableRegistry.addChild(m_robotDrive, m_leftFollowerMotor);
+    SendableRegistry.addChild(m_robotDrive, m_rightLeaderMotor);
+    SendableRegistry.addChild(m_robotDrive, m_rightFollowerMotor); 
 
     // We need to invert one side of the drivetrain so that positive voltages
     // result in both sides moving forward. Depending on how your robot's
     // gearbox is constructed, you might have to invert the left side instead.
-    m_rightDrive.setInverted(true);
+    m_leftLeaderMotor.setInverted(true);
+    m_leftFollowerMotor.setInverted(true);
   }
-  /* 
-  
-  private PS4Controller ps4controller;
-  
-  private final SparkMax m_rightMotor4 = new SparkMax(4, SparkLowLevel.MotorType.kBrushed);
 
-  private final SparkMax m_rightMotor3 = new SparkMax(3, SparkLowLevel.MotorType.kBrushed);
+  @Override
+  public void teleopPeriodic() {
+    // Drive with tank drive.
+    // That means that the Y axis of the left stick moves the left side
+    // of the robot forward and backward, and the Y axis of the right stick
+    // moves the right side of the robot forward and backward.
+    m_robotDrive.tankDrive(m_driverController.getLeftY(), m_driverController.getRightY());
+  }
 
-  private final SparkMax m_leftMotor2 = new SparkMax(2, SparkLowLevel.MotorType.kBrushed);
-
-  private final SparkMax m_leftMotor1 = new SparkMax(1, SparkLowLevel.MotorType.kBrushed);
-
-
-  private final MotorControllerGroup d_left = new MotorControllerGroup(m_leftMotor1,m_leftMotor2);
-  
-  private final MotorControllerGroup d_right = new MotorControllerGroup(m_leftMotor1,m_leftMotor2);
-
-  //right = new MotorControllerGroup(m_rightMotor3,m_rightMotor4);
-
-  //private final DifferentialDrive m_robotDrive = new DifferentialDrive(left::set, right::set);
- */
-
-  /**
-   * This function is run when the robot is first started up and should be used
-   * for any
-   * initialization code.
-   */
   @Override
   public void robotInit() {
     
@@ -159,7 +132,7 @@ public class Robot extends TimedRobot {
     // Drive for 2 seconds
     if (m_timer.get() < 2.0) {
       // Drive forwards half speed, make sure to turn input squaring off
-      m_robotDrive.arcadeDrive(0.5, 0.0, false);
+      m_robotDrive.tankDrive(-0.5, 0.0, false);
     } else {
       m_robotDrive.stopMotor(); // stop robot
     }
@@ -176,16 +149,6 @@ public class Robot extends TimedRobot {
   // }
   }
 
-  /** This function is called periodically during operator control. */
-  @Override
-  public void teleopPeriodic() {
-
-  
-  //if ( ps4controller.getCircleButton() ) {  }
-
-  //}
-
-  }
   @Override
   public void testInit() {
     // Cancels all running commands at the start of test mode.
