@@ -4,6 +4,8 @@
 
 package frc.robot.commands;
 
+import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.CANDriveSubsystem;
 import java.util.function.DoubleSupplier;
@@ -15,16 +17,17 @@ public class DriveCommand extends Command {
   private final CANDriveSubsystem driveSubsystem;
 
   // Constructor. Runs only once when the command is first created.
-  public DriveCommand(
-      DoubleSupplier xSpeed, DoubleSupplier zRotation, CANDriveSubsystem driveSubsystem) {
+  public DriveCommand(DoubleSupplier xSpeed, DoubleSupplier zRotation, CANDriveSubsystem driveSubsystem) {
     // Save parameters to local variables for use later
     this.xSpeed = xSpeed;
     this.zRotation = zRotation;
     this.driveSubsystem = driveSubsystem;
+   // driveSubsystem.driveTank(-xSpeed.getAsDouble(), zRotation.getAsDouble());
 
     // Declare subsystems required by this command. This should include any
     // subsystem this command sets and output of
     addRequirements(this.driveSubsystem);
+
   }
 
   // Runs each time the command is scheduled.
@@ -35,7 +38,7 @@ public class DriveCommand extends Command {
   // Runs every cycle while the command is scheduled (~50 times per second)
   @Override
   public void execute() {
-    driveSubsystem.driveArcade(xSpeed.getAsDouble(), zRotation.getAsDouble());
+    //driveSubsystem.driveTank(-xSpeed.getAsDouble(), zRotation.getAsDouble());
   }
 
   // Runs each time the command ends via isFinished or being interrupted.
