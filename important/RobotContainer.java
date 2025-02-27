@@ -31,8 +31,7 @@ import frc.robot.subsystems.CANRollerSubsystem;
  */
 public class RobotContainer {
   // The robot's subsystems
-  
-  //PS4Controller ps4controller = new PS4Controller(1);
+
 
   private final CANDriveSubsystem driveSubsystem = new CANDriveSubsystem();
   private final CANRollerSubsystem rollerSubsystem = new CANRollerSubsystem();
@@ -114,11 +113,4 @@ public class RobotContainer {
     return autoChooser.getSelected();
   }
 
-  public Command driveTank(
-    CANDriveSubsystem driveSubsystem, DoubleSupplier xSpeed, DoubleSupplier zRotation) {
-    return Commands.run(
-        () -> driveSubsystem.driveTank(xSpeed.getAsDouble(), zRotation.getAsDouble()), driveSubsystem);
 
-    } 
-
-  }
